@@ -1,0 +1,44 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: python manage.py runserver --settings=config.settings.local 0.0.0.0:8000 
+    volumes:
+      - .:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - migration
+      - db
+  migration:
+    build: .
+    command: python manage.py migrate --settings=config.settings.local 
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+  db:
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - "POSTGRES_DB=slabcode_db"
+      - "POSTGRES_USER=slabcode_user"
+      - "POSTGRES_PASSWORD=slabcode_pass"
+  redis:
+    image: redis:alpine
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A project_creator_api worker --loglevel=info 
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+      - web
+
+volumes:
+  postgres_data:

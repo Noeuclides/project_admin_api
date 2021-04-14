@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django =  "3.2"
+djangorestframework =  "3.12.4"
+psycopg2-binary =  "2.8.6"
+celery = "==5.0.5"
+redis =  "3.5.3"
+django-environ =  "0.4.5"
+argon2-cffi = "18.3.0"
+pyjwt = "2.0.1"
+
+[dev-packages]
+django-extensions = "==2.1.4"
+pycodestyle = "*"
+autopep8 = "*"
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+makemigrations = "python manage.py makemigrations --settings=config.settings.local"
+migrate = "python manage.py migrate --settings=config.settings.local"
+createsuperuser = "python manage.py createsuperuser --settings=config.settings.local"
+server = "python manage.py runserver --settings=config.settings.local 0.0.0.0:8000"
+autopep8 = "autopep8 --in-place --aggressive --aggressive"
+test = "python manage.py test --settings=config.settings.test"
