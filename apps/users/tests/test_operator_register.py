@@ -11,6 +11,7 @@ from django.core import mail
 from rest_framework.test import APIClient
 from rest_framework import status
 
+
 class BaseTest(TestCase):
     def setUp(self):
         self.admin = {
@@ -47,19 +48,21 @@ class TestOperator(BaseTest):
         self.assertEqual(user.is_admin, True)
 
     def test_admin_login(self):
-        response = self.client.post('/api/admin/login/', self.admin, format='json')
+        response = self.client.post(
+            '/api/admin/login/', self.admin, format='json')
 
-    def test_send_confirmation_email(self):
+    def test_operator_creation(self):
         client = APIClient()
-        client.post('/api/operator/register/', self.operator, format='json')
+        response = client.post('/api/admin/operator/',
+                               self.operator, format='json')
         user = User.objects.filter(username='first_op').first()
-        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
-            self.assertEqual(len(mail.outbox), 1)
-            self.assertEqual(mail.outbox[0].to[0], user.email)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(user.is_admin, False)
+        self.assertEqual(user.is_enabled, False)
 
     def test_verify_account_with_token(self):
         client = APIClient()
-        client.post('/api/operator/register/', self.operator, format='json')
+        client.post('/api/admin/operator/', self.operator, format='json')
         user = User.objects.filter(username='first_op').first()
         self.assertEqual(user.is_admin, False)
         self.assertEqual(user.is_enabled, False)
@@ -70,7 +73,8 @@ class TestOperator(BaseTest):
         auth_token = {
             'token': token[0]
         }
-        response = client.post('/api/operator/verify/', auth_token, format='json')
+        response = client.post('/api/operator/verify/',
+                               auth_token, format='json')
 
         # get user with values updated
         user_updated = User.objects.get(username=user.username)

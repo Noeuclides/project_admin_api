@@ -53,14 +53,14 @@ class TestAdmin(BaseTest):
             'username': self.admin.get('username'),
             'password': self.admin.get('password')
         }
-        response = self.client.post('/api/admin/login/', login_credentials, format='json')
+        response = self.client.post(
+            '/api/admin/login/', login_credentials, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_operator_creation(self):
+    def test_send_confirmation_email(self):
         client = APIClient()
-        response = client.post('/api/admin/operator/',
-                               self.operator, format='json')
+        client.post('/api/admin/operator/', self.operator, format='json')
         user = User.objects.filter(username='first_op').first()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(user.is_admin, False)
-        self.assertEqual(user.is_enabled, False)
+        with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
+            self.assertEqual(len(mail.outbox), 1)
+            self.assertEqual(mail.outbox[0].to[0], user.email)
