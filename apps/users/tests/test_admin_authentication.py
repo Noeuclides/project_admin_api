@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls.base import reverse
 from apps.users.models import User
 from django.core import mail
-
+from rest_framework.authtoken.models import Token
 
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -64,3 +64,28 @@ class TestAdmin(BaseTest):
         with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
             self.assertEqual(len(mail.outbox), 1)
             self.assertEqual(mail.outbox[0].to[0], user.email)
+
+    def test_admin_change_password(self):
+        self.client.post('/api/admin/signup/', self.admin, format='json')
+        username = self.admin.get('username')
+        password = self.admin.get('password')
+        login_credentials = {
+            'username': username,
+            'password': password
+        }
+        response = self.client.post(
+            '/api/admin/login/', login_credentials, format='json')
+        token = Token.objects.get(user__username=username)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        user = User.objects.get(username=username)
+        password_change = {
+            'new_password': 'newpassadmin',
+            'confirm_new_password': 'newpassadmin',
+            'password': self.admin.get('password'),
+        }
+
+        response = self.client.post('/api/admin/password/', password_change, format='json')
+        user_updated = User.objects.get(username=username)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(user_updated.password, user.password)

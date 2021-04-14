@@ -86,3 +86,23 @@ class UserLoginSerializer(serializers.Serializer):
         """
         token, _ = Token.objects.get_or_create(user=self.context['user'])
         return self.context['user'], token.key
+
+
+class UserPasswordChangeSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=8, max_length=64)
+    new_password = serializers.CharField(min_length=8, max_length=64)
+    confirm_new_password = serializers.CharField(min_length=8, max_length=64)
+
+    def validate(self, data):
+        """Check credentials.
+        """
+        if data['new_password'] == data['password']:
+            raise serializers.ValidationError('Password must be different')
+        if data['new_password'] != data['confirm_new_password']:
+            raise serializers.ValidationError('New passwords does not match.')
+        self.context['new_password'] = data['new_password']
+        return data
+
+    def update(self, user):
+        user.password = self.context.get('new_password')
+        user.save()
