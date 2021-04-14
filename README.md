@@ -1,4 +1,4 @@
-# Project Creator API
+# Projects Administrator API
 
 API REST for users to create projects with its associate tasks.
 
