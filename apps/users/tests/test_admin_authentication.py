@@ -12,7 +12,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 
-class BaseTest(TestCase):
+class TestAdmin(TestCase):
+
     def setUp(self):
         self.admin = {
             'username': 'first_admin',
@@ -36,9 +37,6 @@ class BaseTest(TestCase):
 
         return super().setUp()
 
-
-class TestAdmin(BaseTest):
-
     def test_admin_signup(self):
         client = APIClient()
         response = client.post('/api/admin/signup/', self.admin, format='json')
@@ -57,35 +55,84 @@ class TestAdmin(BaseTest):
             '/api/admin/login/', login_credentials, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+
+class TestAdminActions(TestCase):
+
+    def setUp(self):
+        self.admin = {
+            'username': 'first_admin',
+            'email': 'first_admin@gmail.com',
+            'name': 'first',
+            'last_name': 'admin',
+            'password': 'passadmin',
+            'password_confirmation': 'passadmin',
+        }
+        self.operator = {
+            'username': 'first_op',
+            'email': 'first_op@gmail.com',
+            'name': 'first',
+            'last_name': 'op',
+            'password': 'operator123',
+            'password_confirmation': 'operator123',
+            'is_admin': False,
+            'is_enabled': False,
+        }
+        self.username = self.admin.get('username')
+        self.password = self.admin.get('password')
+        self.login_credentials = {
+            'username': self.username,
+            'password': self.password
+        }
+        self.client = APIClient()
+        self.client.post('/api/admin/signup/', self.admin, format='json')
+        self.client.post(
+            '/api/admin/login/', self.login_credentials, format='json')
+        token = Token.objects.get(user__username=self.username)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        return super().setUp()
+
+    def test_operator_creation(self):
+        response = self.client.post('/api/admin/operator/',
+                                    self.operator, format='json')
+        user = User.objects.filter(
+            username=self.operator.get('username')).first()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(user.is_admin, False)
+        self.assertEqual(user.is_enabled, False)
+
     def test_send_confirmation_email(self):
-        client = APIClient()
-        client.post('/api/admin/operator/', self.operator, format='json')
+        self.client.post('/api/admin/operator/', self.operator, format='json')
         user = User.objects.filter(username='first_op').first()
         with self.settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend'):
             self.assertEqual(len(mail.outbox), 1)
             self.assertEqual(mail.outbox[0].to[0], user.email)
 
     def test_admin_change_password(self):
-        self.client.post('/api/admin/signup/', self.admin, format='json')
-        username = self.admin.get('username')
-        password = self.admin.get('password')
-        login_credentials = {
-            'username': username,
-            'password': password
-        }
-        response = self.client.post(
-            '/api/admin/login/', login_credentials, format='json')
-        token = Token.objects.get(user__username=username)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        user = User.objects.get(username=username)
+        user = User.objects.get(username=self.username)
         password_change = {
             'new_password': 'newpassadmin',
             'confirm_new_password': 'newpassadmin',
             'password': self.admin.get('password'),
         }
 
-        response = self.client.post('/api/admin/password/', password_change, format='json')
-        user_updated = User.objects.get(username=username)
-        
+        response = self.client.post(
+            '/api/admin/password/', password_change, format='json')
+        user_updated = User.objects.get(username=self.username)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertNotEqual(user_updated.password, user.password)
+
+    def test_admin_update_operator(self):
+        response = self.client.post('/api/admin/operator/',
+                                    self.operator, format='json')
+        user = User.objects.filter(
+            username=self.operator.get('username')).first()
+        self.assertEqual(user.is_enabled, False)
+        self.operator['is_enabled'] = True
+        response = self.client.put(
+            '/api/operator/first_op/info/', self.operator, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user_updated = User.objects.filter(
+            username=self.operator.get('username')).first()
+        self.assertEqual(user_updated.is_enabled, True)
