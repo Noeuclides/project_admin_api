@@ -8,16 +8,38 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from rest_framework import serializers
 
-from .base import UserRegisterSerializer
+from .base import UserRegisterSerializer, UserModelSerializer
 
 
-class OperatorRegisterSerializer(UserRegisterSerializer):
+class OperatorRegisterSerializer(UserModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
 
-    def create(self, data):
-        data.pop('password_confirmation')
-        user = User.objects.create_user(
-            **data, is_enabled=False, is_admin=False
-        )
+    # def update(self, instance, validated_data):
+    #     instance.username = validated_data.get('username')
+    #     instance.email = validated_data.get('email')
+    #     instance.name = validated_data.get('name')
+    #     instance.last_name = validated_data.get('last_name')
+    #     instance.is_enabled = validated_data.get('is_enabled')
+    #     instance.is_admin = validated_data.get('is_admin')
+    #     instance.save()
+    #     return instance
+
+    # def create(self, data):
+    #     data.pop('password_confirmation')
+    #     user = User.objects.create_user(
+    #         **data, is_enabled=False, is_admin=False
+    #     )
+    #     self.send_confirmation_email(user)
+    #     return user
+
+    def create(self, validated_data: dict) -> User:
+        validated_data['is_enabled'] = False
+        validated_data['is_admin'] = False
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
         self.send_confirmation_email(user)
         return user
 

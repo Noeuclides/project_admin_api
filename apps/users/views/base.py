@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 
 class BaseViewSet(viewsets.GenericViewSet):
-    queryset = User.objects.filter(is_enabled=True)
+    queryset = User.objects.filter()
     serializer_class = UserModelSerializer
     lookup_field = 'username'
 
