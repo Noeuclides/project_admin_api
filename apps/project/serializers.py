@@ -1,10 +1,6 @@
 from apps.users.models import User
 from apps.project.models import Project, Task
-from django.conf import settings
-from django.contrib.auth import authenticate, password_validation
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
-from rest_framework.validators import UniqueValidator
 from apps.users.serializers.base import UserModelSerializer
 
 
