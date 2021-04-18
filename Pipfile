@@ -12,11 +12,13 @@ redis =  "3.5.3"
 django-environ =  "0.4.5"
 argon2-cffi = "18.3.0"
 pyjwt = "2.0.1"
+djangorestframework-simplejwt = "3.3"
 
 [dev-packages]
 django-extensions = "==2.1.4"
 pycodestyle = "*"
 autopep8 = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.7"
