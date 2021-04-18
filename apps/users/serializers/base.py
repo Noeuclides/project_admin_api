@@ -1,10 +1,7 @@
-from django.conf import settings
-from django.contrib.auth import authenticate, password_validation
-from rest_framework import serializers
-from rest_framework.authtoken.models import Token
-from rest_framework.validators import UniqueValidator
-
 from apps.users.models import User
+from django.contrib.auth import password_validation
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 
 class UserModelSerializer(serializers.ModelSerializer):
@@ -58,34 +55,6 @@ class UserRegisterSerializer(serializers.Serializer):
         data.pop('password_confirmation')
         user = User.objects.create_user(**data)
         return user
-
-
-class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-
-    # Password
-    password = serializers.CharField(min_length=8, max_length=64)
-
-    def validate(self, data):
-        """Check credentials.
-        """
-        user = authenticate(
-            username=data['username'],
-            password=data['password']
-        )
-        if not user:
-            raise serializers.ValidationError('Invalid credentials')
-        if not user.is_enabled:
-            raise serializers.ValidationError('Account is not active yet')
-        self.context['user'] = user
-        return data
-
-    def create(self, data):
-        """
-        Generate or retrieve new token.
-        """
-        token, _ = Token.objects.get_or_create(user=self.context['user'])
-        return self.context['user'], token.key
 
 
 class UserPasswordChangeSerializer(serializers.Serializer):

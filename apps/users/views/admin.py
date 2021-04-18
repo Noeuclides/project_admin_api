@@ -1,19 +1,22 @@
 from apps.users.models import User
+from apps.users.serializers.admin import AdminRegisterSerializer
+from apps.users.serializers.base import UserModelSerializer
+from apps.users.serializers.operator import OperatorRegisterSerializer
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from apps.users.serializers.base import UserModelSerializer
-from apps.users.serializers.admin import AdminRegisterSerializer
+
 from .base import BaseViewSet
-from apps.users.serializers.operator import OperatorRegisterSerializer
+
 
 class AdminViewSet(BaseViewSet):
     queryset = User.objects.filter(is_admin=True)
 
     def get_permissions(self):
         """
-        Instantiates and returns the list of permissions that this view requires.
+        Instantiates and returns the list of permissions
+        that this view requires.
         """
         if self.action in ['operator']:
             permission_classes = [IsAuthenticated]
@@ -39,5 +42,3 @@ class AdminViewSet(BaseViewSet):
         user = serializer.save()
         data = UserModelSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
-
-    

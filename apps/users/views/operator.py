@@ -1,11 +1,13 @@
-from apps.users.serializers.base import UserModelSerializer
 from apps.users.models import User
+from apps.users.serializers.base import UserModelSerializer
+from apps.users.serializers.operator import (AccountVerificationSerializer,
+                                             OperatorRegisterSerializer)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.users.serializers.operator import AccountVerificationSerializer, OperatorRegisterSerializer
 from .base import BaseViewSet
+
 
 class OperatorViewSet(BaseViewSet):
     queryset = User.objects.filter(is_admin=False)
