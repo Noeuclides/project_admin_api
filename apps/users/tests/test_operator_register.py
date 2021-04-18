@@ -1,16 +1,10 @@
-import os
-import json
 import re
-from django.core.management import call_command
-from django.test import TestCase
-from django.urls.base import reverse
+
 from apps.users.models import User
 from django.core import mail
-from rest_framework.authtoken.models import Token
-
-
-from rest_framework.test import APIClient
+from django.test import TestCase
 from rest_framework import status
+from rest_framework.test import APIClient
 
 
 class BaseTest(TestCase):
@@ -41,10 +35,10 @@ class BaseTest(TestCase):
         }
         self.client = APIClient()
         self.client.post('/api/admin/signup/', self.admin, format='json')
-        self.client.post(
-            '/api/admin/login/', self.login_credentials, format='json')
-        token = Token.objects.get(user__username=self.username)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.post(
+            '/api/login/', self.login_credentials, format='json')
+        token = response.data.get('access')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
 
         return super().setUp()
 
