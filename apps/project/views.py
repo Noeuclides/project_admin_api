@@ -4,7 +4,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
+from rest_framework.generics import get_object_or_404
 from apps.project.models import Project, Task
 from apps.project.serializers import (ProjectModelSerializer,
                                            TaskModelSerializer)
@@ -15,6 +15,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     """Project view set."""
     queryset = Project.objects.all()
     serializer_class = ProjectModelSerializer
+    permission_classes = [IsAuthenticated,]
 
     @action(detail=True, methods=['patch'])
     def done(self, request, pk):
@@ -57,6 +58,25 @@ class TaskViewSet(viewsets.ModelViewSet):
     """Task view set."""
     queryset = Task.objects.all()
     serializer_class = TaskModelSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def dispatch(self, request, *args, **kwargs):
+        """Verify that the project exists."""
+        pk = kwargs['pk1']
+        self.project = get_object_or_404(Project, pk=pk)
+        return super(TaskViewSet, self).dispatch(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        """Handle task creation."""
+        serializer = TaskModelSerializer(
+            data=request.data,
+            context={'project': self.project, 'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        task = serializer.save()
+
+        data = self.get_serializer(task).data
+        return Response(data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['patch'])
     def done(self, request, pk):

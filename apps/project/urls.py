@@ -5,7 +5,8 @@ from .views import ProjectViewSet, TaskViewSet
 
 router = DefaultRouter()
 router.register(r'project', ProjectViewSet, basename='projects')
-router.register(r'task', TaskViewSet, basename='tasks')
+# router.register(r'task', TaskViewSet, basename='tasks')
+router.register(r'project/(?P<pk1>[^/.]+)/task', TaskViewSet, basename='tasks')
 
 urlpatterns = [
     path('', include(router.urls))
