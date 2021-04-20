@@ -11,6 +11,6 @@ router.register(r'operator', operator.OperatorViewSet, basename='operators')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('login/', TokenObtainPairView.as_view(), name='login'),
+    path('login/', base.LoginView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

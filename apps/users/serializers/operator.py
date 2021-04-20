@@ -15,11 +15,13 @@ class OperatorRegisterSerializer(UserModelSerializer):
     class Meta:
         model = User
         fields = [
+            'id',
             'username',
             'email',
             'password',
             'name',
             'last_name',
+            'is_enabled'
         ]
 
     def create(self, validated_data: dict) -> User:

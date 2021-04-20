@@ -7,10 +7,27 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .base import BaseViewSet
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from apps.users.permissions import IsAdmin
 
 
 class OperatorViewSet(BaseViewSet):
     queryset = User.objects.filter(is_admin=False)
+    serializer_class = OperatorRegisterSerializer
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions
+        that this view requires.
+        """
+        if self.action in ['enable', 'disable']:
+            permission_classes = [IsAdmin]
+        elif self.action in ['verify']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
 
     @action(detail=False, methods=['post'])
     def verify(self, request):
@@ -22,11 +39,25 @@ class OperatorViewSet(BaseViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['patch', 'put'])
-    def info(self, request, username):
-        """Operator register by admin"""
-        user = self.get_object()
-        serializer = OperatorRegisterSerializer(user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        data = UserModelSerializer(user).data
+    def enable(self, request, pk):
+        """Account verification."""
+        operator = User.objects.filter(id=pk, is_admin=False).first()
+        if not operator:
+            data = {'message': f'There is not operator with id {pk}'}
+        else:
+            operator.is_enabled = True
+            operator.save()
+            data = {'message': f'Operator {operator} is enabled'}
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['patch', 'put'])
+    def disable(self, request, pk):
+        """Account verification."""
+        operator = User.objects.filter(id=pk, is_admin=False).first()
+        if not operator:
+            data = {'message': f'There is not operator with id {pk}'}
+        else:
+            operator.is_enabled = False
+            operator.save()
+            data = {'message': f'Operator {operator} is disabled'}
         return Response(data, status=status.HTTP_200_OK)

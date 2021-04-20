@@ -2,12 +2,14 @@ from apps.users.models import User
 from django.contrib.auth import password_validation
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'id',
             'username',
             'email',
             'name',
@@ -73,5 +75,16 @@ class UserPasswordChangeSerializer(serializers.Serializer):
         return data
 
     def update(self, user):
-        user.password = self.context.get('new_password')
+        user.set_password(self.context.get('new_password'))
         user.save()
+        return user
+
+
+class UserLoginSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if not self.user.is_enabled:
+            raise serializers.ValidationError('Operator is disable, communicate with the admins.')
+
+        return data
