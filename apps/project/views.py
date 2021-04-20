@@ -17,7 +17,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectModelSerializer
     permission_classes = [IsAuthenticated,]
 
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=['patch', 'put'])
     def done(self, request, pk):
         task = Task.objects.filter(project__id=pk, is_complete=False)
         if not task:
@@ -78,8 +78,8 @@ class TaskViewSet(viewsets.ModelViewSet):
         data = self.get_serializer(task).data
         return Response(data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['patch'])
-    def done(self, request, pk):
+    @action(detail=True, methods=['patch', 'put'])
+    def done(self, request, pk1, pk):
         task = Task.objects.filter(pk=pk).first()
         task.is_complete = True
         task.save()
