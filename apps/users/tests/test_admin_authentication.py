@@ -125,8 +125,8 @@ class TestAdminActions(TestCase):
         self.assertEqual(user.is_enabled, False)
         self.operator['is_enabled'] = True
         response = self.client.put(
-            '/api/operator/first_op/info/', self.operator, format='json')
+            f'/api/operator/{user.id}/', self.operator, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         user_updated = User.objects.filter(
-            username=self.operator.get('username')).first()
+            id=user.id).first()
         self.assertEqual(user_updated.is_enabled, True)

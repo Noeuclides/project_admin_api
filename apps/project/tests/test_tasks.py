@@ -33,43 +33,45 @@ class TestTask(TestBaseAPI):
         return super().setUp()
 
     def test_task_creation(self):
-        response = self.client_operator.post('/api/task/',
+        response = self.client_operator.post('/api/project/1/task/',
                                              self.task, format='json')
         task = Task.objects.filter(pk=1).first()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(task.project.id, self.task.get('project'))
 
     def test_task_update_destroy(self):
-        self.client_operator.post('/api/task/',
+        self.client_operator.post('/api/project/1/task/',
                                   self.task, format='json')
-        response = self.client_operator.put('/api/task/1/',
+        response = self.client_operator.put('/api/project/1/task/1/',
                                             self.task_updated, format='json')
+            
         task = Task.objects.filter(pk=1).first()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(task.name, self.task_updated.get('name'))
-        self.client_operator.delete('/api/task/1/', format='json')
+        self.client_operator.delete('/api/project/1/task/1/', format='json')
         tasks = Task.objects.all().count()
         self.assertEqual(tasks, 0)
 
     def test_task_complete(self):
-        self.client_operator.post('/api/task/',
+        self.client_operator.post('/api/project/1/task/',
                                   self.task, format='json')
         task = Task.objects.filter(pk=1).first()
         self.assertEqual(task.is_complete, False)
         response = self.client_operator.patch(
-            '/api/task/1/done/', format='json')
+            f'/api/project/1/task/{task.id}/done/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         task = Task.objects.filter(pk=1).first()
         self.assertEqual(task.is_complete, True)
 
     def test_project_complete_with_send_email_to_admins(self):
-        self.client_operator.post('/api/task/',
+        self.client_operator.post('/api/project/1/task/',
                                   self.task, format='json')
         self.client_operator.patch('/api/project/1/done/', format='json')
         project = Project.objects.filter(pk=1).first()
         self.assertEqual(project.is_complete, False)
 
-        self.client_operator.patch('/api/task/1/done/', format='json')
+        self.client_operator.patch('/api/project/1/task/1/done/', format='json')
+
         response = self.client_operator.patch(
             '/api/project/1/done/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
