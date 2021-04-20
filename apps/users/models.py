@@ -52,7 +52,6 @@ class UserManager(BaseUserManager):
             password,
             True,
             True,
-            True,
             **extra_fields)
 
 
