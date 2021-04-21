@@ -36,8 +36,7 @@ If docker:
 ```bash
 docker-compose up --build
 ```
-Make shure that the migrations been run.
-
+Make sure that the migrations have been run.
 
 
 Else:
