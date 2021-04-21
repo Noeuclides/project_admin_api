@@ -36,10 +36,11 @@ If docker:
 ```bash
 docker-compose up --build
 ```
-And go to http://127.0.0.1:8000 on the browser.
+Make shure that the migrations been run.
+
+
 
 Else:
-
 
 - Run the migrate command:
 
@@ -60,3 +61,9 @@ pipenv run createsuperuser
 Note: The migrate, server, createsuperuser commands are configured in the Pipfile.
 
 
+You can test the api on postman with this link:
+https://www.getpostman.com/collections/26c3685cdd6b6e93c6cc
+
+Make sure to set the environment variables host, admin_refresh and operator_refresh.
+
+Documentation can be seen on postman or on the /redoc/ or /swagger/ endpoints.
