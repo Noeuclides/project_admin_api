@@ -10,7 +10,7 @@ if not settings.configured:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')
 
 
-app = Celery('project_creator_api')
+app = Celery('config')
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
 # - namespace='CELERY' means all celery-related configuration keys
