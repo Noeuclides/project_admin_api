@@ -75,3 +75,6 @@ class TaskModelSerializer(serializers.ModelSerializer):
                 'Execution date must be between start and end date of the project.')
         instance.save()
         return instance
+
+    def test_serializer(self):
+        return self.project
