@@ -1,8 +1,9 @@
-from apps.users.models import User
-from apps.project.models import Project, Task
-from rest_framework import serializers
-from apps.users.serializers.base import UserModelSerializer
 from django.db.models import Q
+from rest_framework import serializers
+
+from apps.project.models import Project, Task
+from apps.users.models import User
+from apps.users.serializers.base import UserModelSerializer
 
 
 class ProjectModelSerializer(serializers.ModelSerializer):
@@ -74,3 +75,6 @@ class TaskModelSerializer(serializers.ModelSerializer):
                 'Execution date must be between start and end date of the project.')
         instance.save()
         return instance
+
+    def test_serializer(self):
+        pass
