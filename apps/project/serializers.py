@@ -77,4 +77,5 @@ class TaskModelSerializer(serializers.ModelSerializer):
         return instance
 
     def test_serializer(self):
-        pass
+        project = self.project
+        return project
