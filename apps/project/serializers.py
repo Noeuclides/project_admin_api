@@ -78,4 +78,4 @@ class TaskModelSerializer(serializers.ModelSerializer):
 
     def test_serializer(self):
         project = self.project
-        return project
+        return f'new {project}'
